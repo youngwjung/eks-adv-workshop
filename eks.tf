@@ -194,7 +194,10 @@ resource "kubernetes_manifest" "ec2nodeclass_default" {
             "karpenter.sh/discovery" = module.eks.cluster_name
           }
         },
-      ]
+      ],
+      "metadataOptions" = {
+        "httpPutResponseHopLimit" = 2
+      }
     }
   }
 
