@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.2"
     }
+    htpasswd = {
+      source  = "loafoe/htpasswd"
+      version = "1.0.4"
+    }
   }
 }
 

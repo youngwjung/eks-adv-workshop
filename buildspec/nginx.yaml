@@ -1,0 +1,48 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - REPO_NAME=$(basename $FULL_REPOSITORY_NAME)
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - AWS_ACCOUNT_ID=$(echo $CODEBUILD_BUILD_ARN | cut -f5 -d ':')
+      - echo Logging in to Amazon ECR...
+      - |
+        aws ecr get-login-password \
+        --region $AWS_DEFAULT_REGION | \
+        docker login --username AWS --password-stdin \
+        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      # 컨테이너 이미지 태그
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo Building the API Docker image...
+      # 이미지 생성
+      - docker build --tag nginx:$IMAGE_TAG .
+      # 이미지 태그
+      - |
+        docker tag \
+        $REPO_NAME:$IMAGE_TAG \
+        $ECR_REPO:$IMAGE_TAG
+      # 컨테이너 이미지 Push
+      - echo Pushing the Docker image...
+      - docker push $ECR_REPO:$IMAGE_TAG
+
+      # Commit 메세지 확인
+      - CODEPIPELINE_NAME=$(basename $CODEBUILD_INITIATOR)
+      - COMMIT_MESSAGE=$(aws codepipeline list-pipeline-executions --pipeline-name $CODEPIPELINE_NAME --max-items 1 --query 'pipelineExecutionSummaries[0].sourceRevisions[0].revisionSummary' | jq -r '. | fromjson | .CommitMessage')
+        
+      - git clone https://root:$GITLAB_ROOT_PASSWORD@$HELM_CHART_URL
+      - cd helm-charts/$REPO_NAME
+      - wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64 -O /usr/bin/yq
+      - chmod +x /usr/bin/yq
+      - yq -i '.image.tag=strenv(IMAGE_TAG)' values_dev.yaml
+      - git config --global user.email $AUTHOR_EMAIL
+      - git config --global user.name $AUTHOR_ID
+      - git add .
+
+      - |
+        if ! git diff-index --quiet HEAD; then
+          git commit -m "$COMMIT_MESSAGE"
+          git push https://root:$GITLAB_ROOT_PASSWORD@$HELM_CHART_URL  
+        fi

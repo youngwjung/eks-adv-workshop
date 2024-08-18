@@ -1,0 +1,16 @@
+global:
+  domain: ${domain}
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+configs:
+  secret:
+    argocdServerAdminPassword: ${server_admin_password}
+  params:
+    "server.insecure": true

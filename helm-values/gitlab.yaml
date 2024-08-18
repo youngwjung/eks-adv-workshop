@@ -1,0 +1,15 @@
+global:
+  edition: ce
+  hosts:
+    domain: ${domain}
+  ingress:
+    configureCertmanager: false
+    class: nginx
+certmanager:
+  install: false
+nginx-ingress:
+  enabled: false
+prometheus:
+  install: false
+gitlab-runner:
+  install: false
