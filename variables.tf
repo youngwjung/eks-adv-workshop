@@ -43,3 +43,8 @@ variable "argocd_chart_version" {
   description = "ArgoCD Helm 차트 버전 "
   type        = string
 }
+
+variable "keda_chart_version" {
+  description = "Keda Helm 차트 버전 "
+  type        = string
+}

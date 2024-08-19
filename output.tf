@@ -22,3 +22,7 @@ output "domain" {
 output "argocd_url" {
   value = data.kubernetes_ingress_v1.argocd.spec.0.rule.0.host
 }
+
+output "sqs_url" {
+  value = module.sqs.queue_url
+}
