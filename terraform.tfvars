@@ -11,4 +11,4 @@ kube_prometheus_stack_chart_version        = "61.9.0"
 thanos_chart_version                       = "15.7.20"
 
 alert_slack_channel     = "infra"
-alert_slack_webhook_url = "https://hooks.slack.com/services/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"
+alert_slack_webhook_url = "aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAxVkRDNjNBQUcvQjA3QU1DVzFTMkYvVmljZVRoNGZ0UDVXOWRyWHRGSjNtVlVh"

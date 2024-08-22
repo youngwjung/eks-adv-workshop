@@ -116,7 +116,7 @@ resource "helm_release" "prometheus" {
       grafana_hostname                  = "grafana.${aws_route53_zone.this.name}"
       thanos_hostname                   = "thanos-query.${aws_route53_zone.this.name}"
       slack_channel                     = var.alert_slack_channel
-      slack_webhook_url                 = var.alert_slack_webhook_url
+      slack_webhook_url                 = base64decode(var.alert_slack_webhook_url)
       thanos_sidecar_role_arn           = module.thanos_irsa.iam_role_arn
       thanos_objconfig_secret_name      = kubernetes_secret_v1.prometheus_object_store_config.metadata[0].name
       alertmanager_password_secret_name = kubernetes_secret.alertmanager.metadata[0].name
