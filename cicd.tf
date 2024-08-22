@@ -72,6 +72,8 @@ module "ecr" {
       }
     ]
   })
+
+  repository_force_delete = true
 }
 
 # GitLab에 있는 리포지토리와 연결

@@ -478,6 +478,7 @@ resource "helm_release" "ingress_nginx" {
   ]
 
   depends_on = [
-    helm_release.aws_load_balancer_controller
+    helm_release.aws_load_balancer_controller,
+    aws_eks_addon.this
   ]
 }
