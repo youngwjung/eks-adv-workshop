@@ -22,6 +22,10 @@ terraform {
       source  = "loafoe/htpasswd"
       version = "1.0.4"
     }
+    opensearch = {
+      source  = "opensearch-project/opensearch"
+      version = "2.3.0"
+    }
   }
 }
 
@@ -57,4 +61,12 @@ provider "helm" {
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
     token                  = data.aws_eks_cluster_auth.this.token
   }
+}
+
+# Opensearch 제공자
+provider "opensearch" {
+  url               = "https://${module.opensearch_log.domain_endpoint}"
+  username          = "admin"
+  password          = "Asdf!234"
+  sign_aws_requests = false
 }

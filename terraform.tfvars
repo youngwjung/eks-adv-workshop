@@ -9,6 +9,7 @@ argocd_chart_version                       = "7.4.4"
 keda_chart_version                         = "2.15.1"
 kube_prometheus_stack_chart_version        = "61.9.0"
 thanos_chart_version                       = "15.7.20"
+fluentbit_chart_version                    = "0.46.10"
 
 alert_slack_channel     = "infra"
 alert_slack_webhook_url = "aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAxVkRDNjNBQUcvQjA3QU1DVzFTMkYvVmljZVRoNGZ0UDVXOWRyWHRGSjNtVlVh"

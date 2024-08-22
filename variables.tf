@@ -68,3 +68,8 @@ variable "alert_slack_webhook_url" {
   description = "슬랙 메세지를 전송할 Webhook URL"
   type        = string
 }
+
+variable "fluentbit_chart_version" {
+  description = "Fluent Bit Helm 차트 버전 "
+  type        = string
+}

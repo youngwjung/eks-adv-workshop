@@ -38,3 +38,7 @@ output "grafana_url" {
 output "thanos_url" {
   value = yamldecode(helm_release.thanos.metadata[0].values)["queryFrontend"]["ingress"]["hostname"]
 }
+
+output "opensearch_dashboard_url" {
+  value = module.opensearch_log.domain_dashboard_endpoint
+}

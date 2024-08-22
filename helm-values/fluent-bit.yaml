@@ -1,0 +1,128 @@
+priorityClassName: system-node-critical
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: ${fluentbit_role_arn}
+config:
+  inputs: |
+    [INPUT]
+        Name                tail     
+        Tag                 app.*
+        Path                /var/log/containers/*_${app_namespace}_*.log
+        Mem_Buf_Limit       5MB
+        Skip_Long_Lines     On
+        multiline.parser    cri
+    
+    [INPUT]
+        Name                tail     
+        Tag                 nginx.*
+        Path                /var/log/containers/*_ingress-nginx_*.log
+        Mem_Buf_Limit       5MB
+        Skip_Long_Lines     On
+        multiline.parser    cri
+        
+  filters: |
+    [FILTER]
+        Name                modify
+        Match               *
+        Remove              _p
+        Remove              stream
+        Remove              logtag
+        Rename              message log
+        
+    [FILTER]
+        Name                parser
+        Match               nginx.*
+        Key_Name            log
+        Parser              k8s-nginx-ingress
+        
+    [FILTER]
+        Name                grep
+        Match               app.*
+        Exclude             log kube-probe
+
+    [FILTER]
+        Name                kubernetes
+        Match               app.*
+        Kube_Tag_Prefix     app.var.log.containers.
+        Merge_Log           On
+        Keep_Log            Off
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+        Annotations         Off
+        
+    [FILTER]
+        Name                nest
+        Match               app.*
+        Operation           lift
+        Nested_under        kubernetes
+        Add_prefix          kubernetes.
+    
+    [FILTER]
+        Name                modify
+        Match               app.*
+        Remove              kubernetes.container_hash
+        Remove              kubernetes.container_name
+        Remove              kubernetes.docker_id
+        Remove              kubernetes.namespace_name
+        Remove              kubernetes.pod_id
+        Remove              kubernetes.pod_name
+
+    [FILTER]
+        Name                nest
+        Match               app.*
+        Operation           lift
+        Nested_under        kubernetes.labels
+        Add_prefix          kubernetes_labels.
+
+    [FILTER]
+        Name                modify
+        Match               app.*
+        Remove              kubernetes_labels.app.kubernetes.io/managed-by
+        Remove              kubernetes_labels.app.kubernetes.io/version
+        Remove              kubernetes_labels.helm.sh/chart
+        Remove              kubernetes_labels.pod-template-hash
+
+    [FILTER]
+        Name                nest
+        Match               app.*
+        Operation           nest
+        Wildcard            kubernetes_labels.*
+        Nest_under          kubernetes.labels
+        Remove_prefix       kubernetes_labels.
+
+    [FILTER]
+        Name                nest
+        Match               app.*
+        Operation           nest
+        Wildcard            kubernetes.*
+        Nested_under        kubernetes
+        Remove_prefix       kubernetes.
+    
+  outputs: |
+    [OUTPUT]
+        Name                es
+        Match               app.*
+        Logstash_Format     On
+        Logstash_Prefix     ${cluster_name}-argocd
+        Logstash_DateFormat %Y.%m
+        Host                ${es_endpoint}
+        Port                443
+        TLS                 On
+        AWS_Auth            On
+        AWS_Region          ap-northeast-2
+        Retry_Limit         False
+        Suppress_Type_Name  On
+    
+    [OUTPUT]
+        Name                es
+        Match               nginx.*
+        Logstash_Format     On
+        Logstash_Prefix     ${cluster_name}-nginx
+        Logstash_DateFormat %Y.%m
+        Host                ${es_endpoint}
+        Port                443
+        TLS                 On
+        AWS_Auth            On
+        AWS_Region          ap-northeast-2
+        Retry_Limit         False
+        Suppress_Type_Name  On
