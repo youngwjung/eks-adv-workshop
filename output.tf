@@ -42,3 +42,7 @@ output "thanos_url" {
 output "opensearch_dashboard_url" {
   value = module.opensearch_log.domain_dashboard_endpoint
 }
+
+output "kubecost_url" {
+  value = yamldecode(helm_release.kubecost.metadata[0].values)["ingress"]["hosts"][0]
+}

@@ -1,0 +1,33 @@
+global:
+  prometheus:
+    enabled: false
+    fqdn: ${thanos_query_fqdn}
+  grafana:
+    enabled: false
+    domainName: ${grafana_domain_name}
+    scheme: https
+serviceMonitor:
+  enabled: true
+kubecostFrontend:
+  image: public.ecr.aws/kubecost/frontend
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  ipv6:
+    enabled: false
+kubecostModel:
+  image: public.ecr.aws/kubecost/cost-model
+  promClusterIDLabel: cluster
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+  - ${hostname}
+grafana:
+  sidecar:
+    dashboards:
+      enabled: false

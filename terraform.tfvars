@@ -13,6 +13,7 @@ fluentbit_chart_version                             = "0.46.10"
 secrets_store_csi_driver_chart_version              = "1.4.2"
 secrets_store_csi_driver_provider_aws_chart_version = "0.3.8"
 reloader_chart_version                              = "1.0.115"
+kubecost_chart_version                              = "2.3.1"
 
 alert_slack_channel     = "infra"
 alert_slack_webhook_url = "aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAxVkRDNjNBQUcvQjA3QU1DVzFTMkYvVmljZVRoNGZ0UDVXOWRyWHRGSjNtVlVh"
