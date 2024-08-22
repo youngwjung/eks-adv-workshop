@@ -7,3 +7,8 @@ ingress_nginx_chart_version                = "4.11.1"
 gitlab_chart_version                       = "8.3.0"
 argocd_chart_version                       = "7.4.4"
 keda_chart_version                         = "2.15.1"
+kube_prometheus_stack_chart_version        = "61.9.0"
+thanos_chart_version                       = "15.7.20"
+
+alert_slack_channel     = "infra"
+alert_slack_webhook_url = "https://hooks.slack.com/services/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"

@@ -1,0 +1,259 @@
+fullnameOverride: kube-prometheus
+prometheus:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: ${thanos_sidecar_role_arn}
+  prometheusSpec:
+    externalUrl: https://${thanos_hostname}
+    externalLabels:
+      cluster: "${cluster_name}"
+    disableCompaction: true
+    retention: 6h
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 2Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    thanos:
+      objectStorageConfig:
+        existingSecret:
+          name: ${thanos_objconfig_secret_name}
+          key: thanos.yml
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+alertmanager:
+  config:
+    route:
+      receiver: infra
+      group_by:
+      - namespace
+      routes: 
+      - receiver: 'null'
+        matchers:
+        - alertname = "KubeletTooManyPods"
+    receivers:
+    - name: 'null'
+    - name: infra
+      slack_configs:
+      - api_url: ${slack_webhook_url}
+        channel: "#${slack_channel}"
+        color: '{{ template "slack.color" . }}'
+        title: '{{ template "slack.title" . }}'
+        text: '{{ template "slack.text" . }}'
+        send_resolved: true
+        actions:
+        - type: button
+          text: 'Runbook :green_book:'
+          url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+        - type: button
+          text: 'Query :mag:'
+          url: '{{ (index .Alerts 0).GeneratorURL }}'
+        - type: button
+          text: 'Dashboard :chart_with_upwards_trend:'
+          url: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
+        - type: button
+          text: 'Silence :no_bell:'
+          url: '{{ template "__alert_silence_link" . }}'
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+    - ${alertmanager_hostname}
+    annotations:
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: ${alertmanager_password_secret_name}
+  serviceMonitor:
+    selfMonitor: false
+  templateFiles:
+    slack.tmpl: |-
+      {{/* Alertmanager Silence link */}}
+      {{ define "__alert_silence_link" -}}
+          {{ .ExternalURL }}/#/silences/new?filter=%7B
+          {{- range .CommonLabels.SortedPairs -}}
+              {{- if ne .Name "alertname" -}}
+                  {{- .Name }}%3D"{{- .Value -}}"%2C%20
+              {{- end -}}
+          {{- end -}}
+          alertname%3D"{{- .CommonLabels.alertname -}}"%7D
+      {{- end }}
+      
+      {{/* Cluster Name */}}
+      {{ define "__cluster_name" -}}
+          *Cluster:* `{{ .CommonLabels.cluster }}`
+      {{- end }}
+      
+      {{/* Severity of the alert */}}
+      {{ define "__alert_severity" -}}
+          {{- if eq .CommonLabels.severity "critical" -}}
+          *Severity:* `Critical`
+          {{- else if eq .CommonLabels.severity "warning" -}}
+          *Severity:* `Warning`
+          {{- else if eq .CommonLabels.severity "info" -}}
+          *Severity:* `Info`
+          {{- else -}}
+          *Severity:* :question: {{ .CommonLabels.severity }}
+          {{- end }}
+      {{- end }}
+      
+      {{/* Title of the Slack alert */}}
+      {{ define "slack.title" -}}
+        [{{ .Status | toUpper -}}
+        {{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{- end -}}
+        ] {{ .CommonLabels.alertname }}
+      {{- end }}
+      
+      
+      {{/* Color of Slack attachment (appears as line next to alert )*/}}
+      {{ define "slack.color" -}}
+          {{ if eq .Status "firing" -}}
+              {{ if eq .CommonLabels.severity "warning" -}}
+                  warning
+              {{- else if eq .CommonLabels.severity "critical" -}}
+                  danger
+              {{- else -}}
+                  #439FE0
+              {{- end -}}
+          {{ else -}}
+          good
+          {{- end }}
+      {{- end }}
+      
+      {{/* The text to display in the alert */}}
+      {{ define "slack.text" -}}
+      
+          {{ template "__cluster_name" . }}
+          {{- "\n" -}}
+          {{ template "__alert_severity" . }}
+          {{- if (index .Alerts 0).Annotations.summary }}
+          {{- "\n" -}}
+          *Summary:* {{ (index .Alerts 0).Annotations.summary }}
+          {{- end }}
+      
+          {{ range .Alerts }}
+      
+              {{- if .Annotations.description }}
+              {{- "\n" -}}
+              {{ .Annotations.description }}
+              {{- "\n" -}}
+              {{- end }}
+              {{- if .Annotations.message }}
+              {{- "\n" -}}
+              {{ .Annotations.message }}
+              {{- "\n" -}}
+              {{- end }}
+      
+          {{- end }}
+      
+      {{- end }}
+grafana:
+  adminPassword: ${grafana_admin_password}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+    - ${grafana_hostname}
+  serviceMonitor:
+    enabled: false
+  sidecar:
+    datasources:
+      name: Thanos
+      uid: thanos
+      url: http://thanos-query.thanos.svc.cluster.local:9090
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: false
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      ingress-nginx:
+        url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/grafana/dashboards/nginx.json
+      ingress-nginx-request-handling-performance:
+        url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/grafana/dashboards/request-handling-performance.json
+      karpenter-capacity-dashboard:
+        url: https://karpenter.sh/v1.0/getting-started/getting-started-with-karpenter/karpenter-capacity-dashboard.json
+      karpenter-performance-dashboard:
+        url: https://karpenter.sh/v1.0/getting-started/getting-started-with-karpenter/karpenter-performance-dashboard.json
+prometheus-node-exporter:
+  priorityClassName: system-node-critical
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: eks.amazonaws.com/compute-type
+              operator: NotIn
+              values:
+                - fargate
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: true
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeStateMetrics:
+  enabled: true
+nodeExporter:
+  enabled: true
+  operatingSystems:
+    darwin:
+      enabled: false
+defaultRules:
+  create: true
+  rules:
+    alertmanager: false
+    etcd: false
+    configReloaders: false
+    general: false
+    k8s: true
+    kubeApiserverAvailability: false
+    kubeApiserverBurnrate: false
+    kubeApiserverHistogram: false
+    kubeApiserverSlos: false
+    kubeControllerManager: false
+    kubelet: false
+    kubeProxy: false
+    kubePrometheusGeneral: false
+    kubePrometheusNodeRecording: false
+    kubernetesApps: true
+    kubernetesResources: false
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeScheduler: false
+    kubeStateMetrics: false
+    network: false
+    node: true
+    nodeExporterAlerting: false
+    nodeExporterRecording: false
+    prometheus: false
+    prometheusOperator: false

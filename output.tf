@@ -26,3 +26,15 @@ output "argocd_url" {
 output "sqs_url" {
   value = module.sqs.queue_url
 }
+
+output "alertmanager_url" {
+  value = yamldecode(helm_release.prometheus.metadata[0].values)["alertmanager"]["ingress"]["hosts"][0]
+}
+
+output "grafana_url" {
+  value = yamldecode(helm_release.prometheus.metadata[0].values)["grafana"]["ingress"]["hosts"][0]
+}
+
+output "thanos_url" {
+  value = yamldecode(helm_release.thanos.metadata[0].values)["queryFrontend"]["ingress"]["hostname"]
+}

@@ -1,0 +1,33 @@
+existingObjstoreSecret: ${thanos_objconfig_secret_name}
+query:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  stores:
+  - dnssrv+_grpc._tcp.prometheus-operated.monitoring.svc.cluster.local:10901
+queryFrontend:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: ${query_frontend_hostname}
+    annotations:
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: ${thanos_password_secret_name}
+storegateway:
+  enabled: true
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: ${thanos_role_arn}
+compactor:
+  enabled: true
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: ${thanos_role_arn}
+  retentionResolutionRaw: 30d
+  retentionResolution5m: 120d
+  retentionResolution1h: 10y

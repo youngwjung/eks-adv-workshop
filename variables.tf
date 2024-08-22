@@ -48,3 +48,23 @@ variable "keda_chart_version" {
   description = "Keda Helm 차트 버전 "
   type        = string
 }
+
+variable "kube_prometheus_stack_chart_version" {
+  description = "Kube-prometheus-stack Helm 차트 버전 "
+  type        = string
+}
+
+variable "thanos_chart_version" {
+  description = "Thanos Helm 차트 버전 "
+  type        = string
+}
+
+variable "alert_slack_channel" {
+  description = "경보를 수신할 슬랙 채널"
+  type        = string
+}
+
+variable "alert_slack_webhook_url" {
+  description = "슬랙 메세지를 전송할 Webhook URL"
+  type        = string
+}

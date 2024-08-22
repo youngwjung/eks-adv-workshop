@@ -136,6 +136,8 @@ resource "helm_release" "karpenter" {
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
+    serviceMonitor:
+      enabled: true
     EOT
   ]
 
