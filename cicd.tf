@@ -12,6 +12,7 @@ resource "helm_release" "gitlab" {
   chart      = "gitlab"
   version    = var.gitlab_chart_version
   namespace  = kubernetes_namespace.gitlab.metadata[0].name
+  timeout    = 600
 
   values = [
     templatefile("${path.module}/helm-values/gitlab.yaml", {
