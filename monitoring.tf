@@ -123,10 +123,6 @@ resource "helm_release" "prometheus" {
       grafana_admin_password            = local.monitoring_password
     })
   ]
-
-  depends_on = [
-    helm_release.ingress_nginx
-  ]
 }
 
 # Thanos를 설치할 네임스페이스
