@@ -88,16 +88,16 @@ module "fluentbit_role" {
   }
 }
 
-# 로그 저장용 OpenSearch 접근 제어
-resource "opensearch_roles_mapping" "opensearch_log_roles_mapping" {
-  role_name = "all_access"
-  users = [
-    "admin"
-  ]
-  backend_roles = [
-    module.fluentbit_role.iam_role_arn
-  ]
-}
+# # 로그 저장용 OpenSearch 접근 제어
+# resource "opensearch_roles_mapping" "opensearch_log_roles_mapping" {
+#   role_name = "all_access"
+#   users = [
+#     "admin"
+#   ]
+#   backend_roles = [
+#     module.fluentbit_role.iam_role_arn
+#   ]
+# }
 
 # Fluentbit
 resource "kubernetes_namespace" "fluent_bit" {
