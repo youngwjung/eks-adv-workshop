@@ -22,10 +22,10 @@ terraform {
       source  = "loafoe/htpasswd"
       version = "1.0.4"
     }
-    opensearch = {
-      source  = "opensearch-project/opensearch"
-      version = "2.3.0"
-    }
+    # opensearch = {
+    #   source  = "opensearch-project/opensearch"
+    #   version = "2.3.0"
+    # }
   }
 }
 
@@ -63,10 +63,10 @@ provider "helm" {
   }
 }
 
-# Opensearch 제공자
-provider "opensearch" {
-  url               = "https://${module.opensearch_log.domain_endpoint}"
-  username          = "admin"
-  password          = "Asdf!234"
-  sign_aws_requests = false
-}
+# # Opensearch 제공자
+# provider "opensearch" {
+#   url               = "https://${module.opensearch_log.domain_endpoint}"
+#   username          = "admin"
+#   password          = "Asdf!234"
+#   sign_aws_requests = false
+# }
