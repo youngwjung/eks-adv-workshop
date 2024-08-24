@@ -42,3 +42,7 @@ output "thanos_url" {
 output "opensearch_dashboard_url" {
   value = module.opensearch_log.domain_dashboard_endpoint
 }
+
+output "fluentbit_role_arn" {
+  value = module.fluentbit_role.iam_role_arn
+}
