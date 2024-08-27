@@ -109,7 +109,7 @@ config:
         Port                443
         TLS                 On
         AWS_Auth            On
-        AWS_Region          ap-northeast-2
+        AWS_Region          ${aws_region}
         Retry_Limit         False
         Suppress_Type_Name  On
     
@@ -123,6 +123,6 @@ config:
         Port                443
         TLS                 On
         AWS_Auth            On
-        AWS_Region          ap-northeast-2
+        AWS_Region          ${aws_region}
         Retry_Limit         False
         Suppress_Type_Name  On
