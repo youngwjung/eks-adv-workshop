@@ -27,8 +27,6 @@ terraform {
 
 # AWS 제공자 설정
 provider "aws" {
-  region = "ap-northeast-2"
-
   # 해당 테라폼 모듈을 통해서 생성되는 모든 AWS 리소스에 아래의 태그 부여
   default_tags {
     tags = local.tags
