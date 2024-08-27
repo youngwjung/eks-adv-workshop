@@ -116,6 +116,7 @@ resource "helm_release" "fluent_bit" {
   values = [
     templatefile("${path.module}/helm-values/fluent-bit.yaml", {
       fluentbit_role_arn = module.fluentbit_role.iam_role_arn
+      aws_region         = data.aws_region.current.name
       es_endpoint        = module.opensearch_log.domain_endpoint
       cluster_name       = local.project
       app_namespace      = "argocd"
