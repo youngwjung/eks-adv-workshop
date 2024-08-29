@@ -7,7 +7,7 @@ module "vpc" {
   cidr = var.vpc_cidr
 
   # 서브넷
-  azs             = data.aws_availability_zones.azs.names
+  azs             = setsubtract(data.aws_availability_zones.azs.names, ["us-east-1e"])
   public_subnets  = [for idx, _ in data.aws_availability_zones.azs.names : cidrsubnet(var.vpc_cidr, 8, idx)]
   private_subnets = [for idx, _ in data.aws_availability_zones.azs.names : cidrsubnet(var.vpc_cidr, 8, idx + 10)]
 
