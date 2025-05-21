@@ -167,7 +167,7 @@ resource "kubernetes_secret" "thanos" {
 # Thanos
 resource "helm_release" "thanos" {
   name       = "thanos"
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "thanos"
   version    = var.thanos_chart_version
   namespace  = kubernetes_namespace.thanos.metadata[0].name
