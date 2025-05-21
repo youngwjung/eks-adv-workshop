@@ -19,11 +19,6 @@ variable "aws_load_balancer_controller_chart_version" {
   type        = string
 }
 
-variable "metrics_server_chart_version" {
-  description = "Kubernetes Metrics Server Helm 차트 버전"
-  type        = string
-}
-
 variable "external_dns_chart_version" {
   description = "Kubernetes ExternalDNS Helm 차트 버전"
   type        = string
@@ -41,11 +36,6 @@ variable "gitlab_chart_version" {
 
 variable "argocd_chart_version" {
   description = "ArgoCD Helm 차트 버전 "
-  type        = string
-}
-
-variable "keda_chart_version" {
-  description = "Keda Helm 차트 버전 "
   type        = string
 }
 

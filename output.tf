@@ -23,10 +23,6 @@ output "argocd_url" {
   value = data.kubernetes_ingress_v1.argocd.spec.0.rule.0.host
 }
 
-output "sqs_url" {
-  value = module.sqs.queue_url
-}
-
 output "alertmanager_url" {
   value = yamldecode(helm_release.prometheus.metadata[0].values)["alertmanager"]["ingress"]["hosts"][0]
 }
