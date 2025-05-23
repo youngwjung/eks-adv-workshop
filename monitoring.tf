@@ -111,7 +111,7 @@ resource "helm_release" "prometheus" {
 
   values = [
     templatefile("${path.module}/helm-values/prometheus.yaml", {
-      cluster_name                      = data.aws_caller_identity.current.account_id
+      cluster_name                      = local.project
       alertmanager_hostname             = "alertmanager.${aws_route53_zone.this.name}"
       grafana_hostname                  = "grafana.${aws_route53_zone.this.name}"
       thanos_hostname                   = "thanos-query.${aws_route53_zone.this.name}"

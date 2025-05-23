@@ -30,6 +30,7 @@ kubecostFrontend:
     enabled: false
 kubecostModel:
   image: public.ecr.aws/kubecost/cost-model
+  promClusterIDLabel: cluster
 forecasting:
   image:
     repository: public.ecr.aws/kubecost/kubecost-modeling
