@@ -58,3 +58,8 @@ variable "alert_slack_webhook_url" {
   description = "슬랙 메세지를 전송할 Webhook URL"
   type        = string
 }
+
+variable "kubecost_chart_version" {
+  description = "Kubecost Helm 차트 버전 "
+  type        = string
+}

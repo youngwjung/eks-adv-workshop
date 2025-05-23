@@ -258,7 +258,7 @@ resource "kubernetes_manifest" "nodepool_default" {
               "key"      = "karpenter.k8s.aws/instance-memory"
               "operator" = "Gt"
               "values" = [
-                "1024",
+                "4096",
               ]
             },
           ]

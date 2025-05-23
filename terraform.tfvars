@@ -7,6 +7,7 @@ gitlab_chart_version                       = "9.0.0"
 argocd_chart_version                       = "8.0.6"
 kube_prometheus_stack_chart_version        = "72.5.1"
 thanos_chart_version                       = "16.0.7"
+kubecost_chart_version                     = "2.7.2"
 
 alert_slack_channel     = "infra"
 alert_slack_webhook_url = "aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAxVkRDNjNBQUcvQjA3QU1DVzFTMkYvVmljZVRoNGZ0UDVXOWRyWHRGSjNtVlVh"

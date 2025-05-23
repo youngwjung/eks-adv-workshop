@@ -34,3 +34,7 @@ output "grafana_url" {
 output "thanos_url" {
   value = yamldecode(helm_release.thanos.metadata[0].values)["queryFrontend"]["ingress"]["hostname"]
 }
+
+output "kubecost_url" {
+  value = yamldecode(helm_release.kubecost.metadata[0].values)["ingress"]["hosts"][0]
+}
