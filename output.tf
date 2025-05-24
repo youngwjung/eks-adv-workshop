@@ -23,10 +23,6 @@ output "argocd_url" {
   value = data.kubernetes_ingress_v1.argocd.spec.0.rule.0.host
 }
 
-output "sqs_url" {
-  value = module.sqs.queue_url
-}
-
 output "alertmanager_url" {
   value = yamldecode(helm_release.prometheus.metadata[0].values)["alertmanager"]["ingress"]["hosts"][0]
 }
@@ -45,4 +41,8 @@ output "opensearch_dashboard_url" {
 
 output "fluentbit_role_arn" {
   value = module.fluentbit_role.iam_role_arn
+}
+
+output "kubecost_url" {
+  value = yamldecode(helm_release.kubecost.metadata[0].values)["ingress"]["hosts"][0]
 }
