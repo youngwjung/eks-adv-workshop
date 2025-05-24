@@ -12,6 +12,7 @@ resource "helm_release" "gitlab" {
   chart      = "gitlab"
   version    = var.gitlab_chart_version
   namespace  = kubernetes_namespace.gitlab.metadata[0].name
+  timeout    = 600
 
   values = [
     templatefile("${path.module}/helm-values/gitlab.yaml", {
@@ -51,7 +52,7 @@ data "kubernetes_secret_v1" "gitlab" {
 # ECR 리포지토리
 module "ecr" {
   source  = "terraform-aws-modules/ecr/aws"
-  version = "2.2.1"
+  version = "2.4.0"
 
   repository_name                 = "nginx"
   repository_image_tag_mutability = "MUTABLE"
@@ -77,15 +78,15 @@ module "ecr" {
 }
 
 # GitLab에 있는 리포지토리와 연결
-resource "aws_codestarconnections_host" "this" {
+resource "aws_codeconnections_host" "this" {
   name              = "gitlab"
   provider_endpoint = "https://${data.kubernetes_ingress_v1.gitlab.spec.0.rule.0.host}"
   provider_type     = "GitLabSelfManaged"
 }
 
-resource "aws_codestarconnections_connection" "this" {
+resource "aws_codeconnections_connection" "this" {
   name     = "gitlab"
-  host_arn = aws_codestarconnections_host.this.arn
+  host_arn = aws_codeconnections_host.this.arn
 }
 
 # 코드 파이프라인에서 사용할 버킷
@@ -107,6 +108,7 @@ resource "aws_iam_policy" "codepipeline" {
           "Action": [
             "s3:*",
             "codestar-connections:UseConnection",
+            "codeconnections:UseConnection",
             "codebuild:*"
           ],
           "Effect": "Allow",
@@ -118,10 +120,8 @@ resource "aws_iam_policy" "codepipeline" {
 }
 
 resource "aws_iam_role" "codepipeline" {
-  name = "ezl-codepipeline-service-role"
+  name = "codepipeline-service-role"
   path = "/service-role/"
-
-  managed_policy_arns = [aws_iam_policy.codepipeline.arn]
 
   assume_role_policy = <<-POLICY
     {
@@ -139,9 +139,14 @@ resource "aws_iam_role" "codepipeline" {
   POLICY
 }
 
+resource "aws_iam_role_policy_attachment" "codepipeline" {
+  role       = aws_iam_role.codepipeline.name
+  policy_arn = aws_iam_policy.codepipeline.arn
+}
+
 # 코드 빌드에서 사용할 IAM 역할
 resource "aws_iam_policy" "codebuild" {
-  name = "ezl-codebuild-policy"
+  name = "codebuild-policy"
 
   policy = <<-POLICY
     {
@@ -158,10 +163,11 @@ resource "aws_iam_policy" "codebuild" {
           "Resource": "*"
         },
         {
-          "Sid": "CodeStartPolicy",
+          "Sid": "CodeConnectionsPolicy",
           "Effect": "Allow",
           "Action": [
-            "codestar-connections:UseConnection"
+            "codestar-connections:UseConnection",
+            "codeconnections:UseConnection"
           ],
           "Resource": "*"
         },
@@ -221,10 +227,8 @@ resource "aws_iam_policy" "codebuild" {
 }
 
 resource "aws_iam_role" "codebuild" {
-  name = "ezl-codebuild-service-role"
+  name = "codebuild-service-role"
   path = "/service-role/"
-
-  managed_policy_arns = [aws_iam_policy.codebuild.arn]
 
   assume_role_policy = <<-POLICY
     {
@@ -240,13 +244,11 @@ resource "aws_iam_role" "codebuild" {
       ]
     }
   POLICY
+}
 
-  lifecycle {
-    ignore_changes = [
-      # 자동으로 추가되는 정책 삭제 방지
-      managed_policy_arns
-    ]
-  }
+resource "aws_iam_role_policy_attachment" "codebuild" {
+  role       = aws_iam_role.codebuild.name
+  policy_arn = aws_iam_policy.codebuild.arn
 }
 
 # 코드 빌드 로그를 저장할 로그 그룹
@@ -283,6 +285,10 @@ resource "aws_codebuild_project" "this" {
     location  = "https://${data.kubernetes_ingress_v1.gitlab.spec.0.rule.0.host}/root/nginx.git"
     buildspec = file("${path.module}/buildspec/nginx.yaml")
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.codebuild
+  ]
 }
 
 # CodePipeline
@@ -309,7 +315,7 @@ resource "aws_codepipeline" "this" {
       output_artifacts = ["SourceArtifact"]
 
       configuration = {
-        ConnectionArn        = aws_codestarconnections_connection.this.arn
+        ConnectionArn        = aws_codeconnections_connection.this.arn
         FullRepositoryId     = "root/nginx"
         BranchName           = "main"
         OutputArtifactFormat = "CODEBUILD_CLONE_REF"
@@ -381,6 +387,10 @@ resource "aws_codepipeline" "this" {
       }
     }
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.codepipeline
+  ]
 }
 
 # Argo CD를 설치할 네임스페이스

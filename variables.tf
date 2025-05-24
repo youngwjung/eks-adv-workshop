@@ -19,11 +19,6 @@ variable "aws_load_balancer_controller_chart_version" {
   type        = string
 }
 
-variable "metrics_server_chart_version" {
-  description = "Kubernetes Metrics Server Helm 차트 버전"
-  type        = string
-}
-
 variable "external_dns_chart_version" {
   description = "Kubernetes ExternalDNS Helm 차트 버전"
   type        = string
@@ -41,11 +36,6 @@ variable "gitlab_chart_version" {
 
 variable "argocd_chart_version" {
   description = "ArgoCD Helm 차트 버전 "
-  type        = string
-}
-
-variable "keda_chart_version" {
-  description = "Keda Helm 차트 버전 "
   type        = string
 }
 
@@ -71,6 +61,10 @@ variable "alert_slack_webhook_url" {
 
 variable "fluentbit_chart_version" {
   description = "Fluent Bit Helm 차트 버전 "
+}
+
+variable "kubecost_chart_version" {
+  description = "Kubecost Helm 차트 버전 "
   type        = string
 }
 
@@ -86,10 +80,5 @@ variable "secrets_store_csi_driver_provider_aws_chart_version" {
 
 variable "reloader_chart_version" {
   description = "Reloader Helm 차트 버전 "
-  type        = string
-}
-
-variable "kubecost_chart_version" {
-  description = "Kubecost Helm 차트 버전 "
   type        = string
 }

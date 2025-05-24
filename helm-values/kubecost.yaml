@@ -6,8 +6,17 @@ global:
     enabled: false
     domainName: ${grafana_domain_name}
     scheme: https
+grafana:
+  sidecar:
+    dashboards:
+      enabled: false
 serviceMonitor:
   enabled: true
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+  - ${hostname}
 kubecostFrontend:
   image: public.ecr.aws/kubecost/frontend
   resources:
@@ -21,13 +30,12 @@ kubecostFrontend:
     enabled: false
 kubecostModel:
   image: public.ecr.aws/kubecost/cost-model
-  promClusterIDLabel: cluster
-ingress:
+forecasting:
+  image:
+    repository: public.ecr.aws/kubecost/kubecost-modeling
+networkCosts:
   enabled: true
-  className: nginx
-  hosts:
-  - ${hostname}
-grafana:
-  sidecar:
-    dashboards:
-      enabled: false
+  image:
+    repository: public.ecr.aws/kubecost/kubecost-network-costs
+reporting:
+  productAnalytics: false

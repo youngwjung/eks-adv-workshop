@@ -1,7 +1,7 @@
 # EKS 클러스터
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.23.0"
+  version = "20.36.0"
 
   cluster_name    = local.project
   cluster_version = var.eks_cluster_version
@@ -83,7 +83,7 @@ resource "aws_eks_addon" "coredns" {
 # Karpenter 구성에 필요한 AWS 리소스 생성
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "20.23.0"
+  version = "20.36.0"
 
   cluster_name                  = module.eks.cluster_name
   node_iam_role_name            = "${module.eks.cluster_name}-node-role"
@@ -258,7 +258,7 @@ resource "kubernetes_manifest" "nodepool_default" {
               "key"      = "karpenter.k8s.aws/instance-memory"
               "operator" = "Gt"
               "values" = [
-                "1024",
+                "4096",
               ]
             },
           ]
@@ -273,6 +273,7 @@ locals {
   eks_addons = [
     "kube-proxy",
     "vpc-cni",
+    "metrics-server",
     "aws-ebs-csi-driver",
     "eks-pod-identity-agent"
   ]
@@ -299,7 +300,7 @@ resource "aws_eks_addon" "this" {
   ]
 
   timeouts {
-    create = "5m"
+    create = "2m"
   }
 }
 
@@ -346,7 +347,7 @@ resource "kubernetes_annotations" "default_storageclass" {
 # AWS Load Balancer Controller에 부여할 IAM 역할 및 Pod Identity Association
 module "aws_load_balancer_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "1.4.0"
+  version = "1.11.0"
 
   name = "aws-load-balancer-controller"
 
@@ -391,23 +392,10 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 }
 
-# Metrics Server
-resource "helm_release" "metrics_server" {
-  name       = "metrics-server"
-  repository = "https://kubernetes-sigs.github.io/metrics-server"
-  chart      = "metrics-server"
-  version    = var.metrics_server_chart_version
-  namespace  = "kube-system"
-
-  depends_on = [
-    helm_release.aws_load_balancer_controller
-  ]
-}
-
 # ExternalDNS에 부여할 IAM 역할 및 Pod Identity Association
 module "external_dns_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "1.4.0"
+  version = "1.11.0"
 
   name = "external-dns"
 

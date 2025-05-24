@@ -1,10 +1,10 @@
 # 로그 저장용 OpenSearch
 module "opensearch_log" {
   source  = "terraform-aws-modules/opensearch/aws"
-  version = "1.2.2"
+  version = "1.7.0"
 
   domain_name    = "${local.project}-log"
-  engine_version = "OpenSearch_2.13"
+  engine_version = "OpenSearch_2.19"
 
   cluster_config = {
     dedicated_master_enabled = false
@@ -70,7 +70,7 @@ resource "aws_iam_policy" "opensearch_log_access" {
 # Fluent Bit에 부여할 역할
 module "fluentbit_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.39.1"
+  version = "5.55.0"
 
   role_name = "${local.project}-fluentbit"
 
@@ -87,17 +87,6 @@ module "fluentbit_role" {
     }
   }
 }
-
-# # 로그 저장용 OpenSearch 접근 제어
-# resource "opensearch_roles_mapping" "opensearch_log_roles_mapping" {
-#   role_name = "all_access"
-#   users = [
-#     "admin"
-#   ]
-#   backend_roles = [
-#     module.fluentbit_role.iam_role_arn
-#   ]
-# }
 
 # Fluentbit
 resource "kubernetes_namespace" "fluent_bit" {

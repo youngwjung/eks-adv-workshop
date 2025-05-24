@@ -8,7 +8,7 @@ resource "kubernetes_namespace" "kubecost" {
 # Kubecost
 resource "helm_release" "kubecost" {
   name       = "kubecost"
-  repository = "https://kubecost.github.io/cost-analyzer"
+  repository = "oci://public.ecr.aws/kubecost"
   chart      = "cost-analyzer"
   version    = var.kubecost_chart_version
   namespace  = kubernetes_namespace.kubecost.metadata[0].name

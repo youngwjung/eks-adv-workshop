@@ -27,7 +27,7 @@ resource "helm_release" "secrets_store_csi_driver_provider_aws" {
 # Pod에 부여할 역할
 module "pod_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.39.1"
+  version = "5.55.0"
 
   role_name = "${local.project}-pod"
 
