@@ -111,7 +111,6 @@ resource "helm_release" "prometheus" {
 
   values = [
     templatefile("${path.module}/helm-values/prometheus.yaml", {
-      cluster_name                      = data.aws_caller_identity.current.account_id
       alertmanager_hostname             = "alertmanager.${aws_route53_zone.this.name}"
       grafana_hostname                  = "grafana.${aws_route53_zone.this.name}"
       thanos_hostname                   = "thanos-query.${aws_route53_zone.this.name}"
@@ -122,10 +121,6 @@ resource "helm_release" "prometheus" {
       alertmanager_password_secret_name = kubernetes_secret.alertmanager.metadata[0].name
       grafana_admin_password            = local.monitoring_password
     })
-  ]
-
-  depends_on = [
-    helm_release.ingress_nginx
   ]
 }
 
@@ -171,7 +166,7 @@ resource "kubernetes_secret" "thanos" {
 # Thanos
 resource "helm_release" "thanos" {
   name       = "thanos"
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "thanos"
   version    = var.thanos_chart_version
   namespace  = kubernetes_namespace.thanos.metadata[0].name
