@@ -1,0 +1,8 @@
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hosts:
+  - host: ${hostname}
+    paths:
+    - path: /
+      type: Prefix

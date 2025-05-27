@@ -82,3 +82,8 @@ variable "reloader_chart_version" {
   description = "Reloader Helm 차트 버전 "
   type        = string
 }
+
+variable "headlamp_chart_version" {
+  description = "Headlamp Helm 차트 버전 "
+  type        = string
+}

@@ -46,3 +46,7 @@ output "fluentbit_role_arn" {
 output "kubecost_url" {
   value = yamldecode(helm_release.kubecost.metadata[0].values)["ingress"]["hosts"][0]
 }
+
+output "headlamp_url" {
+  value = yamldecode(helm_release.headlamp.metadata[0].values)["ingress"]["hosts"][0]["host"]
+}
