@@ -5,6 +5,8 @@ prometheus:
       eks.amazonaws.com/role-arn: ${thanos_sidecar_role_arn}
   prometheusSpec:
     externalUrl: https://${thanos_hostname}
+    externalLabels:
+      cluster: "${cluster_name}"
     disableCompaction: true
     retention: 6h
     resources:
